@@ -1,5 +1,6 @@
 import cv2
-import numpy as np
+from input_reformat import reformat_face_state
+from cube_config import color_ranges
 
 cap = cv2.VideoCapture(0) 
 
@@ -7,17 +8,6 @@ if not cap.isOpened():
     print("Camera unavailable")
     exit()
 
-# Color Range LUT
-# note: red1 & red2 are needed bc red wraps around hsv color space 0->10 & 170->180
-color_ranges = {
-    "red1": (np.array([0, 120, 70]), np.array([10, 255, 255])),
-    "red2": (np.array([170, 120, 70]), np.array([180, 255, 255])),
-    "green": (np.array([35, 80, 50]), np.array([85, 255, 255])),
-    "blue": (np.array([90, 80, 50]), np.array([130, 255, 255])),
-    "yellow": (np.array([20, 100, 100]), np.array([35, 255, 255])),
-    "orange": (np.array([10, 100, 100]), np.array([20, 255, 255])),
-    "white": (np.array([0, 0, 180]), np.array([180, 70, 255]))
-}
 
 #helper function - single cell color detector for reusability
 def detect_cell_color(hsv_cell):
@@ -54,7 +44,7 @@ while True:
     if not returnVal : break
 
     #make frame like a mirror so our left is camera's left, etc.
-    #frame = cv2.flip(frame, 1) -> left out for now
+    frame = cv2.flip(frame, 1) #just for testing, will be removed later
 
     #rectangle parameters
     h, w, _ = frame.shape #h=height, w=width, _=color channels
@@ -106,23 +96,30 @@ while True:
                         cv2.FONT_HERSHEY_PLAIN, 0.8, (0,0,0), 1)
 
         grid_colors.append(row_colors)
+
+    # Flip detected data horizontally
+    # ------ JUST FOR TESTING ----------------
+    grid_colors = [row[::-1] for row in grid_colors]
     
     #draw box
     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 0), 2)
 
-    #print colors in 3x3 grid when p is pressed
-    confirm = cv2.waitKey(1) & 0xFF #store key press
-    if confirm == ord('p'): #only print to terminal when 'p' pressed
+    confirm = cv2.waitKey(1) & 0xFF
+
+    if confirm == ord('p'):
         print("\n--- Captured Face ---")
         for row in grid_colors:
             print(" ".join(row))
 
+        face_string = reformat_face_state(grid_colors)
+        print("Reformatted face:", face_string)
+
+    elif confirm == ord('q'):
+        break
     
     cv2.imshow("Color Box Reader 3x3", frame)
     #cv2.imshow("ROI", roi) left out for now but can be used for debugging
     
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
     
 cap.release()
 cv2.destroyAllWindows()
