@@ -49,10 +49,10 @@ color_ranges = {
 # Values are degrees clockwise: 0, 90, 180, or 270
 # These are placeholders. Adjust after testing.
 FACE_ROTATIONS = {
-    "U": 180,
+    "U": 0,
     "R": 0,
     "F": 0,
-    "D": 180,
+    "D": 0,
     "L": 0,
-    "B": 180
+    "B": 0
 }
