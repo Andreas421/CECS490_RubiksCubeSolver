@@ -1,57 +1,25 @@
-from cube_config import COLOR_MAP, COLOR_TO_FACE, FACE_TO_COLOR, FACE_ORDER, FACE_ROTATIONS
-
-
-# Temporary one-face test function
-def reformat_face_state(face_matrix):
-    face_string = ""
-
-    for row in face_matrix:
-        for color in row:
-            if color not in COLOR_MAP:
-                raise ValueError(f"Unknown color '{color}'.")
-            face_string += COLOR_MAP[color]
-
-    return face_string
+from cube_config import COLOR_TO_FACE, FACE_ORDER, FACE_ROTATIONS, FACE_TO_COLOR
 
 
 def rotate_face(face_matrix, degrees):
-    """
-    Rotates a 3x3 face matrix clockwise.
-    """
-
+    """Return a rotated copy of a 3x3 face matrix."""
     if degrees == 0:
         return [row[:] for row in face_matrix]
 
-    elif degrees == 90:
-        return [
-            [face_matrix[2][0], face_matrix[1][0], face_matrix[0][0]],
-            [face_matrix[2][1], face_matrix[1][1], face_matrix[0][1]],
-            [face_matrix[2][2], face_matrix[1][2], face_matrix[0][2]]
-        ]
+    if degrees == 90:
+        return [list(row) for row in zip(*face_matrix[::-1])]
 
-    elif degrees == 180:
-        return [
-            [face_matrix[2][2], face_matrix[2][1], face_matrix[2][0]],
-            [face_matrix[1][2], face_matrix[1][1], face_matrix[1][0]],
-            [face_matrix[0][2], face_matrix[0][1], face_matrix[0][0]]
-        ]
+    if degrees == 180:
+        return [row[::-1] for row in face_matrix[::-1]]
 
-    elif degrees == 270:
-        return [
-            [face_matrix[0][2], face_matrix[1][2], face_matrix[2][2]],
-            [face_matrix[0][1], face_matrix[1][1], face_matrix[2][1]],
-            [face_matrix[0][0], face_matrix[1][0], face_matrix[2][0]]
-        ]
+    if degrees == 270:
+        return [list(row) for row in zip(*face_matrix)][::-1]
 
-    else:
-        raise ValueError("Rotation must be 0, 90, 180, or 270 degrees.")
+    raise ValueError("Rotation must be 0, 90, 180, or 270 degrees.")
 
 
 def reformat_cube_state(captured_faces):
-    """
-    Converts captured faces into a 54-character solver string.
-    """
-
+    """Convert captured color faces into a 54-character Kociemba cube string."""
     if len(captured_faces) != 6:
         raise ValueError("Exactly 6 captured faces are required.")
 
@@ -63,10 +31,7 @@ def reformat_cube_state(captured_faces):
         if face_color not in captured_faces:
             raise ValueError(f"Missing {face_color} face for {face_label} side.")
 
-        face_matrix = captured_faces[face_color]
-
-        rotation_degrees = FACE_ROTATIONS[face_label]
-        rotated_face = rotate_face(face_matrix, rotation_degrees)
+        rotated_face = rotate_face(captured_faces[face_color], FACE_ROTATIONS[face_label])
 
         for row in rotated_face:
             for color in row:

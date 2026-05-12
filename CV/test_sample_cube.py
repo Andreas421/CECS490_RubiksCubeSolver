@@ -24,50 +24,55 @@ sample_captured_faces = {
         ["white", "red", "red"],
         ["white", "red", "red"]
     ],
-    "white": [  #green on top 
-        ["orange", "orange", "orange"], 
+    "white": [  #blue on top  
         ["white", "white", "white"],
-        ["white", "white", "white"] 
+        ["white", "white", "white"],
+        ["orange", "orange", "orange"] 
     ],
-    "yellow": [ #blue on top
+    "yellow": [ #green on top
+        ["red", "red", "red"],
         ["yellow", "yellow", "yellow"],
-        ["yellow", "yellow", "yellow"],
-        ["red", "red", "red"]  
+        ["yellow", "yellow", "yellow"]
+         
     ]
 }
 '''
 
 sample_captured_faces = {
-    "blue": [ #white on top
-        ["blue", "blue", "blue"],
-        ["blue", "blue", "blue"],
-        ["blue", "blue", "blue"]
+    "blue": [ #yellow on top
+        ["white",  "white", "orange"],
+        ["yellow", "blue",  "green"],
+        ["green",  "orange","blue"]
     ],
-    "green": [ #white on top
-        ["green", "green", "green"],
-        ["green", "green", "green"],
-        ["green", "green", "green"]
+
+    "green": [ #yellow on top
+        ["red",    "green", "red"],
+        ["orange", "green", "green"],
+        ["orange", "white", "blue"]
     ],
-    "orange": [ #white on top
-        ["orange", "orange", "yellow"],
-        ["orange", "orange", "yellow"],
-        ["orange", "orange", "yellow"]
+
+    "orange": [ #yellow on top
+        ["blue",  "red",    "red"],
+        ["white", "orange", "orange"],
+        ["white", "yellow", "white"]
     ],
-    "red": [    #white on top
-        ["white", "red", "red"],
-        ["white", "red", "red"],
-        ["white", "red", "red"]
+
+    "red": [ #yellow on top
+        ["yellow", "green", "yellow"],
+        ["orange", "red",   "blue"],
+        ["yellow", "red",   "blue"]
     ],
-    "white": [  #green on top  
-        ["white", "white", "white"],
-        ["white", "white", "white"],
-        ["orange", "orange", "orange"] 
+
+    "white": [ #blue on top
+        ["orange", "white", "red"],
+        ["blue",   "white", "blue"],
+        ["orange", "red",   "yellow"]
     ],
+
     "yellow": [ #blue on top
-        ["red", "red", "red"],
-        ["yellow", "yellow", "yellow"],
-        ["yellow", "yellow", "yellow"]
-         
+        ["white",  "yellow", "green"],
+        ["yellow", "yellow", "red"],
+        ["green",  "blue",   "green"]
     ]
 }
 
