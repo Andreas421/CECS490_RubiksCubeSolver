@@ -13,6 +13,26 @@ COLOR_MAP = {
     "unknown": "X"
 }
 
+# Fixed cube housing orientation - changeable
+COLOR_TO_FACE = {
+    "white": "U",
+    "yellow": "D",
+    "green": "F",
+    "blue": "B",
+    "red": "R",
+    "orange": "L"
+}
+
+# used to find which color face belongs to U, R, F, D, L, B - must change with above LUT
+FACE_TO_COLOR = {
+    "U": "white",
+    "D": "yellow",
+    "F": "green",
+    "B": "blue",
+    "R": "red",
+    "L": "orange"
+}
+
 # Color Range LUT
 # note: red1 & red2 are needed bc red wraps around hsv color space 0->10 & 170->180
 color_ranges = {

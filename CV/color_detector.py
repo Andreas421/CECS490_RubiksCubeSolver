@@ -1,8 +1,10 @@
 import cv2
-from input_reformat import reformat_face_state
+from input_reformat import reformat_face_state, reformat_cube_state
 from cube_config import color_ranges
+from cube_capture import CubeCapture
 
 cap = cv2.VideoCapture(0) 
+cube_capture = CubeCapture()
 
 if not cap.isOpened():
     print("Camera unavailable")
@@ -107,12 +109,29 @@ while True:
     confirm = cv2.waitKey(1) & 0xFF
 
     if confirm == ord('p'):
+        was_saved = cube_capture.add_face(grid_colors)
+        cube_capture.print_captured_faces()
+
         print("\n--- Captured Face ---")
         for row in grid_colors:
             print(" ".join(row))
 
         face_string = reformat_face_state(grid_colors)
         print("Reformatted face:", face_string)
+
+        if was_saved and cube_capture.is_complete():
+            print("\n--- All 6 faces captured ---")
+            cube_capture.print_color_counts()
+
+            if cube_capture.validate_cube():
+                print("Cube validation passed.")
+
+                cube_string = reformat_cube_state(cube_capture.get_faces())
+                print("\n--- Full Cube String ---")
+                print(cube_string)
+
+            else:
+                print("Cube validation failed.")
 
     elif confirm == ord('q'):
         break
