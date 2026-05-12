@@ -1,7 +1,9 @@
 import cv2
+import kociemba
 from input_reformat import reformat_face_state, reformat_cube_state
 from cube_config import color_ranges
 from cube_capture import CubeCapture
+from cube_solver import solve_cube
 
 cap = cv2.VideoCapture(0) 
 cube_capture = CubeCapture()
@@ -129,6 +131,10 @@ while True:
                 cube_string = reformat_cube_state(cube_capture.get_faces())
                 print("\n--- Full Cube String ---")
                 print(cube_string)
+
+                solve_instructions = solve_cube(cube_string)
+                print("\n--- Solve Instructions ---")
+                print(solve_instructions)
 
             else:
                 print("Cube validation failed.")

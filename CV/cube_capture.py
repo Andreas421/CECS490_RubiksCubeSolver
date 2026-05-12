@@ -17,14 +17,16 @@ class CubeCapture:
 
         center_color = self.get_center_color(face_matrix)
 
-        if center_color in self.faces:
-            print(f"Face with center color '{center_color}' was already captured.")
-            return False
+        already_captured = center_color in self.faces
 
-        # Store a copy of the face matrix
+        # Store or replace a copy of the face matrix
         self.faces[center_color] = [row[:] for row in face_matrix]
 
-        print(f"Saved {center_color} face.")
+        if already_captured:
+            print(f"Updated {center_color} face.")
+        else:
+            print(f"Saved {center_color} face.")
+
         print(f"Captured {self.face_count()}/6 faces.")
 
         return True

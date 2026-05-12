@@ -44,3 +44,15 @@ color_ranges = {
     "orange": (np.array([10, 100, 100]), np.array([20, 255, 255])),
     "white": (np.array([0, 0, 180]), np.array([180, 70, 255]))
 }
+
+# Face rotation correction before building solver string
+# Values are degrees clockwise: 0, 90, 180, or 270
+# These are placeholders. Adjust after testing.
+FACE_ROTATIONS = {
+    "U": 180,
+    "R": 0,
+    "F": 0,
+    "D": 180,
+    "L": 0,
+    "B": 180
+}
