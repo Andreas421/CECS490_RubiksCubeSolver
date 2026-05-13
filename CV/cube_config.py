@@ -29,10 +29,10 @@ CUBE_COLORS = set(COLOR_TO_FACE.keys())
 # Use this only if a face is consistently scanned rotated relative to the convention above.
 # Values must be 0, 90, 180, or 270 degrees clockwise.
 FACE_ROTATIONS = {
-    "U": 0,
+    "U": 180,
     "R": 0,
     "F": 0,
-    "D": 0,
+    "D": 180,
     "L": 0,
     "B": 0,
 }

@@ -39,40 +39,37 @@ sample_captured_faces = {
 '''
 
 sample_captured_faces = {
-    "blue": [ #yellow on top
-        ["white",  "white", "orange"],
-        ["yellow", "blue",  "green"],
-        ["green",  "orange","blue"]
+    "blue": [ #white on top
+        ["yellow", "green", "blue"],
+        ["red", "blue", "blue"],
+        ["orange", "red", "green"]
     ],
-
-    "green": [ #yellow on top
-        ["red",    "green", "red"],
-        ["orange", "green", "green"],
-        ["orange", "white", "blue"]
+    "green": [ #white on top
+        ["orange", "yellow", "red"],
+        ["green", "green", "orange"],
+        ["green", "orange", "orange"]
     ],
-
-    "orange": [ #yellow on top
-        ["blue",  "red",    "red"],
-        ["white", "orange", "orange"],
-        ["white", "yellow", "white"]
+    "orange": [ #white on top
+        ["orange", "red", "white"],
+        ["orange", "orange", "white"],
+        ["white", "blue", "yellow"]
     ],
-
-    "red": [ #yellow on top
-        ["yellow", "green", "yellow"],
-        ["orange", "red",   "blue"],
-        ["yellow", "red",   "blue"]
+    "red": [    #white on top
+        ["blue", "blue", "red"],
+        ["white", "red", "yellow"],
+        ["green", "green", "blue"]
     ],
-
-    "white": [ #blue on top
-        ["orange", "white", "red"],
-        ["blue",   "white", "blue"],
-        ["orange", "red",   "yellow"]
+    "white": [  #green on top  
+        ["white", "blue", "green"],
+        ["white", "white", "green"],
+        ["blue", "orange", "white"] 
     ],
 
     "yellow": [ #blue on top
-        ["white",  "yellow", "green"],
+        ["yellow", "white", "red"],
         ["yellow", "yellow", "red"],
-        ["green",  "blue",   "green"]
+        ["yellow", "yellow", "red"]
+         
     ]
 }
 
