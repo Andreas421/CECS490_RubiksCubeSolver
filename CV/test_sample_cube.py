@@ -1,8 +1,9 @@
 from input_reformat import reformat_cube_state
 from cube_solver import solve_cube
+import kociemba
 
-'''
-#solved cube, apply F move & this is what should look like captured
+
+#solved cube
 sample_captured_faces = {
     "blue": [ #white on top
         ["blue", "blue", "blue"],
@@ -15,29 +16,30 @@ sample_captured_faces = {
         ["green", "green", "green"]
     ],
     "orange": [ #white on top
-        ["orange", "orange", "yellow"],
-        ["orange", "orange", "yellow"],
-        ["orange", "orange", "yellow"]
+        ["orange", "orange", "orange"],
+        ["orange", "orange", "orange"],
+        ["orange", "orange", "orange"]
     ],
     "red": [    #white on top
-        ["white", "red", "red"],
-        ["white", "red", "red"],
-        ["white", "red", "red"]
+        ["red", "red", "red"],
+        ["red", "red", "red"],
+        ["red", "red", "red"]
     ],
     "white": [  #blue on top  
         ["white", "white", "white"],
         ["white", "white", "white"],
-        ["orange", "orange", "orange"] 
+        ["white", "white", "white"] 
     ],
     "yellow": [ #green on top
-        ["red", "red", "red"],
+        ["yellow", "yellow", "yellow"],
         ["yellow", "yellow", "yellow"],
         ["yellow", "yellow", "yellow"]
          
     ]
 }
-'''
 
+
+'''
 sample_captured_faces = {
     "blue": [ #white on top
         ["yellow", "green", "blue"],
@@ -72,6 +74,7 @@ sample_captured_faces = {
          
     ]
 }
+'''
 
 cube_string = reformat_cube_state(sample_captured_faces)
 
@@ -80,6 +83,6 @@ print(cube_string)
 
 solution = solve_cube(cube_string)
 
-
 print("\n--- Solve Instructions ---")
 print(solution)
+

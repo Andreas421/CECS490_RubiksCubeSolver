@@ -1,70 +1,53 @@
-from cube_config import CUBE_COLORS
+from cube_config import COLOR_MAP
 
 
 class CubeValidation:
-    def get_center_color(self, face_matrix):
+    def __init__(self):
+        self.valid_colors = set(COLOR_MAP.keys())
+
+    def get_center_color(self, face_matrix):   #return center color
         return face_matrix[1][1]
 
-    def has_valid_shape(self, face_matrix):
-        if len(face_matrix) != 3:
-            print("Invalid face: face must have exactly 3 rows.")
-            return False
-
-        for row in face_matrix:
-            if len(row) != 3:
-                print("Invalid face: each row must have exactly 3 colors.")
-                return False
-
-        return True
-
-    def has_known_colors(self, face_matrix):
+    def has_valid_colors(self, face_matrix):  #makes sure all detected colors are in color map       
         for row in face_matrix:
             for color in row:
-                if color not in CUBE_COLORS:
-                    print(f"Invalid face: unknown color '{color}'.")
+                if color not in self.valid_colors:
+                    print("Invalid face: contains a color not found in COLOR_MAP.")
                     return False
 
         return True
-
+    
     def validate_face_for_capture(self, face_matrix):
-        if not self.has_valid_shape(face_matrix):
+        # Check that all detected colors exist in COLOR_MAP
+        if not self.has_valid_colors(face_matrix):
+            print("Face not saved: invalid color detected.")
             return False
 
-        if not self.has_known_colors(face_matrix):
-            print("Face not saved: scan contains an unknown color.")
+        # Check that the center color is usable
+        center_color = self.get_center_color(face_matrix)
+        if center_color == "unknown":
+            print("Face not saved: center color is unknown.")
             return False
 
         return True
 
-    def validate_complete_cube(self, captured_faces):
+    def validate_complete_cube(self, captured_faces): #Validate full cube after all faces captured
         if len(captured_faces) != 6:
             print("Invalid cube: exactly 6 faces are required.")
             return False
 
-        if set(captured_faces.keys()) != CUBE_COLORS:
-            missing = CUBE_COLORS - set(captured_faces.keys())
-            extra = set(captured_faces.keys()) - CUBE_COLORS
-            if missing:
-                print("Missing face centers:", ", ".join(sorted(missing)))
-            if extra:
-                print("Invalid face centers:", ", ".join(sorted(extra)))
-            return False
-
         for center_color, face_matrix in captured_faces.items():
-            if not self.has_valid_shape(face_matrix):
-                print(f"Invalid cube: bad shape in {center_color} face.")
+            if center_color not in self.valid_colors:
+                print(f"Invalid cube: '{center_color}' is not a valid center color.")
                 return False
 
-            if not self.has_known_colors(face_matrix):
-                print(f"Invalid cube: bad color in {center_color} face.")
+            if not self.has_valid_colors(face_matrix):
+                print(f"Invalid cube: issue found in {center_color} face.")
                 return False
 
             actual_center = self.get_center_color(face_matrix)
             if actual_center != center_color:
-                print(
-                    f"Invalid cube: stored key '{center_color}' does not match "
-                    f"center '{actual_center}'."
-                )
+                print(f"Invalid cube: stored key '{center_color}' does not match center '{actual_center}'.")
                 return False
 
         if not self.verify_color_counts(captured_faces):
@@ -73,29 +56,34 @@ class CubeValidation:
 
         return True
 
-    def get_color_counts(self, captured_faces):
-        color_counts = {color: 0 for color in CUBE_COLORS}
+    def get_color_counts(self, captured_faces): #how many times each color appears in all captured faces
+        color_counts = {}
+
+        for color in self.valid_colors:
+            if color != "unknown":
+                color_counts[color] = 0
 
         for face_matrix in captured_faces.values():
             for row in face_matrix:
                 for color in row:
-                    if color in color_counts:
+                    if color != "unknown":
                         color_counts[color] += 1
 
         return color_counts
 
-    def verify_color_counts(self, captured_faces):
+    def verify_color_counts(self, captured_faces): #checks each color appears 9 times
         color_counts = self.get_color_counts(captured_faces)
-        is_valid = True
 
-        for color, count in sorted(color_counts.items()):
+        for color, count in color_counts.items():
             if count != 9:
                 print(f"{color}: {count}/9")
-                is_valid = False
+                return False
 
-        return is_valid
+        return True
 
     def print_color_counts(self, captured_faces):
+        color_counts = self.get_color_counts(captured_faces)
+
         print("Color counts:")
-        for color, count in sorted(self.get_color_counts(captured_faces).items()):
+        for color, count in color_counts.items():
             print(f"- {color}: {count}/9")
