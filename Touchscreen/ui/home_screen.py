@@ -66,6 +66,10 @@ class HomeScreen(QWidget):
 
         #travel between screens
         idle_button.clicked.connect(self.main_window.show_idle)
+
         scan_button.clicked.connect(self.main_window.show_scan)
+        #add signal to begin scanning process when scan button is clicked
+
         solve_button.clicked.connect(self.main_window.show_solve)
+        #add signal to begin solving process when solve button is clicked
 
