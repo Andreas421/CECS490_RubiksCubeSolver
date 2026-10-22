@@ -23,7 +23,6 @@ class TestScanEngine(unittest.TestCase):
             restore_original_state=restore
         )
 
-
     # TEST 1 - Verify scanning without restoration
     def test_25_turn_scan(self):
         engine = self.create_engine(restore=False)
@@ -195,7 +194,6 @@ class TestScanEngine(unittest.TestCase):
         self.assertEqual(engine.motor_stages, 0)
         self.assertEqual(engine.face_turns, 0)
         self.assertEqual(engine.tracker.positions, original_positions)
-
     
     # TEST 8 - Verify automatic camera retries
     def test_camera_retries(self):
@@ -240,8 +238,7 @@ class TestScanEngine(unittest.TestCase):
 
         # NEW - Reconstructed cube must remain valid
         self.assertIsInstance(kociemba.solve(cube_string), str)
-
-    
+   
     # TEST 9 - Verify scanning stops after 3 failed camera attempts
     def test_camera_complete_failure(self):
 
@@ -284,8 +281,7 @@ class TestScanEngine(unittest.TestCase):
 
         # NEW - Verify tracker positions remain unchanged
         self.assertEqual(engine.tracker.positions, original_positions)
-
-    
+   
     # TEST 10 - Verify camera failure after several motor movements
     def test_camera_failure_mid_scan(self):
 
@@ -365,8 +361,7 @@ class TestScanEngine(unittest.TestCase):
             engine.tracker.positions,
             original_tracker.positions
         )
-
-    
+  
     # TEST 11 - Verify motor failure during scanning
     def test_motor_failure_mid_scan(self):
 
@@ -434,6 +429,61 @@ class TestScanEngine(unittest.TestCase):
         # NEW - No additional movements or restoration attempted
         self.assertEqual(motor.commands, ["F+B"] * 4)
 
+    # TEST 12 - Verify scan sessions cannot be reused
+    def test_scan_session_reset(self):
+
+        engine = self.create_engine(restore=False)
+
+        # NEW - Run the first scan successfully
+        engine.run_scan()
+
+        self.assertEqual(engine.photo_count, 12)
+        self.assertEqual(engine.motor_stages, 14)
+
+        # NEW - Attempting to reuse the same engine must fail
+        with self.assertRaises(RuntimeError):
+            engine.run_scan()
+
+        # NEW - Create a fresh engine for another cube
+        new_engine = self.create_engine(restore=True)
+
+        new_engine.run_scan()
+
+        # NEW - Verify all counters started fresh
+        self.assertEqual(new_engine.photo_count, 12)
+        self.assertEqual(new_engine.motor_stages, 20)
+        self.assertEqual(new_engine.face_turns, 34)
+        self.assertEqual(len(new_engine.observed_colors), 48)
+
+    # TEST 13 - Prevent restarting an interrupted scan
+    def test_failed_scan_cannot_restart(self):
+
+        # NEW - Simulate a motor that cannot complete movement
+        class FailedMotor:
+            def move(self, command):
+                return False
+
+        engine = ScanEngine(
+            FailedMotor(),
+            SimulatedCamera(),
+            restore_original_state=True
+        )
+
+        # NEW - Initial capture succeeds, first motor move fails
+        with self.assertRaises(RuntimeError):
+            engine.run_scan()
+
+        # NEW - Verify no successful motor movement was recorded
+        self.assertEqual(engine.motor_stages, 0)
+        self.assertEqual(engine.photo_count, 1)
+
+        # NEW - Same engine must not restart after failure
+        with self.assertRaisesRegex(RuntimeError, "Scan already started"):
+            engine.run_scan()
+
+        # NEW - Verify previous data was preserved
+        self.assertEqual(engine.photo_count, 1)
+        self.assertEqual(engine.motor_stages, 0)
 
 # NEW - Run all tests automatically
 if __name__ == "__main__":

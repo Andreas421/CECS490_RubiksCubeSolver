@@ -1,10 +1,13 @@
 import cv2
+import time
+import numpy as np
 
 from cube_config import CAMERA_INDEX
 from color_detector_step1 import read_grid
-from collections import Counter  # NEW
-from cube_config import COLOR_TO_FACE  # NEW
-
+from collections import Counter  
+from cube_config import COLOR_TO_FACE  
+from cube_config import CAMERA_INDEX, BOX_SIZE  
+from color_detector_step1 import read_grid, detect_cell_color  
 
 #Real camera interface for scanning
 class OpenCVCamera:
@@ -17,6 +20,14 @@ class OpenCVCamera:
 
     #Capture multiple frames and verify color consistency
     def capture(self, visible_facelets=None):
+        #Allow camera/cube image to stabilize
+        time.sleep(0.2)
+
+        #Discard 2 potentially buffered frames
+        for i in range(2):
+            if not self.cap.grab():
+                raise RuntimeError("Failed to refresh camera frame")
+        
         samples = []
 
         # NEW - Collect 5 separate camera frames
@@ -68,6 +79,46 @@ class OpenCVCamera:
         read_grid(frame, draw_preview=True)
 
         return frame
+   
+    # NEW - Read HSV values from the center sticker
+    def inspect_center_hsv(self):
+        success, frame = self.cap.read()
+
+        if not success:
+            raise RuntimeError("Failed to read camera frame")
+
+        height, width = frame.shape[:2]
+
+        # NEW - Match our existing center-only sampling area
+        cell_size = BOX_SIZE // 3
+        sample_margin = cell_size // 5
+        half_size = cell_size // 2 - sample_margin
+
+        center_x = width // 2
+        center_y = height // 2
+
+        # NEW - Extract center 60% of the middle sticker
+        sample = frame[
+            center_y - half_size:center_y + half_size,
+            center_x - half_size:center_x + half_size
+        ]
+
+        # NEW - Convert BGR to HSV
+        hsv_sample = cv2.cvtColor(sample, cv2.COLOR_BGR2HSV)
+
+        # NEW - Calculate median HSV values
+        pixels = hsv_sample.reshape(-1, 3)
+        hsv_values = np.median(pixels, axis=0).astype(int)
+
+        # NEW - Identify color using existing detection function
+        detected_color = detect_cell_color(hsv_sample)
+
+        print(
+            f"HSV: H={hsv_values[0]}, "
+            f"S={hsv_values[1]}, "
+            f"V={hsv_values[2]}"
+        )
+        print("Detected color:", detected_color)
 
     #Release the camera when finished
     def close(self):
@@ -78,7 +129,7 @@ class OpenCVCamera:
 if __name__ == "__main__":
     camera = OpenCVCamera()
 
-    print("Controls: p = capture colors, q = quit")
+    print("Controls: p = capture colors, h = inspect HSV, q = quit")
 
     try:
         while True:
@@ -94,6 +145,9 @@ if __name__ == "__main__":
                 print("\n--- Captured Colors ---")
                 for row in grid_colors:
                     print(" ".join(row))
+                      
+            elif key == ord("h"):
+                camera.inspect_center_hsv()
 
             elif key == ord("q"):
                 break

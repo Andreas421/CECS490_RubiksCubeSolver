@@ -76,24 +76,39 @@ class SimulatedCamera:
 
 #Coordinates the automated scanning process
 class ScanEngine:
-    def __init__(self, motor, camera, restore_original_state=True):  
+    def __init__(self, motor, camera, restore_original_state=False, status_callback=None):  
         self.motor = motor
         self.camera = camera  
         self.tracker = FaceletTracker()
         self.restore_original_state = restore_original_state
-
+        self.status_callback = status_callback
+        self.status = "Idle"       
+        self.has_started = False  #Prevent reusing an old scan session
         self.observed = set()
         self.observed_colors = {}  
         self.photo_count = 0
         self.motor_stages = 0
         self.face_turns = 0
+  
+    #Report scanner progress to the  UI
+    def update_status(self, message):
+        self.status = message
 
+        # NEW - Send update if a callback was provided
+        if self.status_callback is not None:
+            self.status_callback(message)
 
     #Execute a motor movement and update tracker
     def execute_move(self, command):
-        movement_complete = self.motor.move(command)
+        # CHANGED - Report communication errors without advancing tracker
+        try:
+            movement_complete = self.motor.move(command)
+        except Exception as error:
+            self.update_status(f"Motor error: {error}")
+            raise
 
         if not movement_complete:
+            self.update_status(f"Motor movement failed: {command}")  
             raise RuntimeError(f"Motor movement failed: {command}")
 
         # Only update tracker after movement completes
@@ -177,8 +192,9 @@ class ScanEngine:
             except (ValueError, RuntimeError) as error:
                 print(f"[CAMERA] Attempt {attempt + 1} failed: {error}")
 
-                # NEW - Stop after the final unsuccessful attempt
+                #Stop after the final unsuccessful attempt
                 if attempt == max_attempts - 1:
+                    self.update_status(f"Camera error: {error}") 
                     raise
 
                 print("[CAMERA] Retrying capture...")
@@ -234,11 +250,23 @@ class ScanEngine:
 
     #Run the complete scanning sequence
     def run_scan(self):
+        #Prevent a completed or failed scan from restarting
+        if self.has_started:
+            raise RuntimeError(
+                "Scan already started. Create a new ScanEngine "
+                "instance for a new scan."
+            )
+
+        #Mark this scan session as used
+        self.has_started = True
+        
+        self.update_status("Scan started")
 
         for phase_name, phase_steps in [
             ("Phase 1", PHASE_1),
             ("Phase 2", PHASE_2)
         ]:
+            self.update_status(f"{phase_name} started")            
             for command, take_photo in phase_steps:
 
                 if command is not None:
@@ -247,16 +275,16 @@ class ScanEngine:
                 if take_photo:
                     #Retry failed captures automatically
                     self.capture_with_retry(
-                        check_initial_center=(self.photo_count == 0)
-                    )
-
+                        check_initial_center=(self.photo_count == 0))
+                    self.update_status(
+                        f"{phase_name}: {self.photo_count}/12 photos captured")
 
             print(f"{phase_name}: {len(self.observed)}/48 stickers observed")
 
         #Restore original scramble if enabled
         if self.restore_original_state:
             print("\nRestoring original scramble...")
-
+            self.update_status("Restoring original scramble")  # NEW
             for command in RESTORE_SEQUENCE:
                 self.execute_move(command)
 
@@ -293,6 +321,7 @@ class ScanEngine:
         print("\nReconstructed cube string:")
         print(cube_string)
 
+        self.update_status("Scan complete")
         return cube_string
 
 
@@ -306,11 +335,16 @@ if __name__ == "__main__":
     motor = SimulatedMotorController()
     camera = SimulatedCamera()
 
+    #Simulate a UI receiving status updates
+    def display_status(message):
+        print(f"[UI STATUS] {message}")
+
     # Change True/False to test both scanning modes
     engine = ScanEngine(
         motor,
         camera,
-        restore_original_state=False
+        restore_original_state=True,
+        status_callback=display_status 
     )
 
     # CHANGED - Scan now returns the reconstructed cube string
