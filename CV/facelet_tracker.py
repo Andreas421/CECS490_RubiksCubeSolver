@@ -109,7 +109,6 @@ class FaceletTracker:
             self.positions[f"B{8 - 3 * i}"] = old[f"D{3 * i}"]
             self.positions[f"U{3 * i}"] = old[f"B{8 - 3 * i}"]
 
-
     #Universal rotation function using standard cube notation
     def rotate(self, command):
 

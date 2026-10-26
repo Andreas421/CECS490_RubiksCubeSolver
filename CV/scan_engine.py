@@ -43,22 +43,22 @@ class SimulatedCamera:
     def __init__(self, scramble_moves=None):  # CHANGED
         scrambled_cube = FaceletTracker()
 
-        # NEW - Allow different scrambles for testing
+        # Allow different scrambles for testing
         if scramble_moves is None:
             scramble_moves = ["F", "R", "B'", "L", "F2", "R'"]
 
-        # CHANGED - Use the provided scramble
+        # Use the provided scramble
         for move in scramble_moves:
             scrambled_cube.rotate(move)
 
-        # UNCHANGED - Assign colors to original sticker positions
+        # Assign colors to original sticker positions
         self.starting_colors = {}
 
         for position, sticker in scrambled_cube.positions.items():
             self.starting_colors[position] = FACE_TO_COLOR[sticker[0]]
 
 
-    # NEW - Return a 3x3 matrix of simulated detected colors
+    # Return a 3x3 matrix of simulated detected colors
     def capture(self, visible_facelets):
         grid_colors = []
 
@@ -90,17 +90,17 @@ class ScanEngine:
         self.motor_stages = 0
         self.face_turns = 0
   
-    #Report scanner progress to the  UI
+    # Report scanner progress to the  UI
     def update_status(self, message):
         self.status = message
 
-        # NEW - Send update if a callback was provided
+        # Send update if a callback was provided
         if self.status_callback is not None:
             self.status_callback(message)
 
-    #Execute a motor movement and update tracker
+    # Execute a motor movement and update tracker
     def execute_move(self, command):
-        # CHANGED - Report communication errors without advancing tracker
+        # Report communication errors without advancing tracker
         try:
             movement_complete = self.motor.move(command)
         except Exception as error:
@@ -168,10 +168,10 @@ class ScanEngine:
                             f"new={detected_color}"
                         )
 
-                # NEW - Stage color without saving it yet
+                # Stage color without saving it yet
                 pending_colors[sticker] = detected_color
 
-        # NEW - Only save after ALL stickers pass validation
+        # Only save after ALL stickers pass validation
         self.observed_colors.update(pending_colors)
         self.observed.update(pending_colors.keys())
         self.photo_count += 1
@@ -179,7 +179,7 @@ class ScanEngine:
         return grid_colors
 
     
-    # NEW - Retry failed camera captures without moving motors
+    # Retry failed camera captures without moving motors
     def capture_with_retry(self, check_initial_center=False):
         max_attempts = 3
 
@@ -200,7 +200,7 @@ class ScanEngine:
                 print("[CAMERA] Retrying capture...")
 
 
-    #Reconstruct the cube's current physical state
+    # Reconstruct the cube's current physical state
     def reconstruct_cube(self):
 
         #Verify every non-center sticker has a recorded color
@@ -248,16 +248,16 @@ class ScanEngine:
 
         return cube_string
 
-    #Run the complete scanning sequence
+    # Run the complete scanning sequence
     def run_scan(self):
-        #Prevent a completed or failed scan from restarting
+        # Prevent a completed or failed scan from restarting
         if self.has_started:
             raise RuntimeError(
                 "Scan already started. Create a new ScanEngine "
                 "instance for a new scan."
             )
 
-        #Mark this scan session as used
+        # Mark this scan session as used
         self.has_started = True
         
         self.update_status("Scan started")
@@ -281,10 +281,10 @@ class ScanEngine:
 
             print(f"{phase_name}: {len(self.observed)}/48 stickers observed")
 
-        #Restore original scramble if enabled
+        # Restore original scramble if enabled
         if self.restore_original_state:
             print("\nRestoring original scramble...")
-            self.update_status("Restoring original scramble")  # NEW
+            self.update_status("Restoring original scramble") 
             for command in RESTORE_SEQUENCE:
                 self.execute_move(command)
 
@@ -298,7 +298,7 @@ class ScanEngine:
 
             print("Original scramble restored: PASSED")
 
-        #Verify all non-center stickers were observed
+        # Verify all non-center stickers were observed
         required = {
             f"{face}{index}"
             for face in FACE_ORDER
@@ -315,7 +315,7 @@ class ScanEngine:
         print("Photos:", self.photo_count)
         print("Stickers observed:", len(self.observed))
 
-        # NEW - Reconstruct and return the final cube state
+        # Reconstruct and return the final cube state
         cube_string = self.reconstruct_cube()
 
         print("\nReconstructed cube string:")
@@ -324,10 +324,7 @@ class ScanEngine:
         self.update_status("Scan complete")
         return cube_string
 
-
-
-
-# CHANGED - Test reconstruction and Kociemba integration
+# Test reconstruction and Kociemba integration
 if __name__ == "__main__":
 
     from cube_solver import solve_cube  # NEW
@@ -347,10 +344,10 @@ if __name__ == "__main__":
         status_callback=display_status 
     )
 
-    # CHANGED - Scan now returns the reconstructed cube string
+    # Scan now returns the reconstructed cube string
     cube_string = engine.run_scan()
 
-    # NEW - Verify against simulated ground truth
+    # Verify against simulated ground truth
     expected_string = ""
 
     for face in FACE_ORDER:
@@ -363,7 +360,7 @@ if __name__ == "__main__":
     assert cube_string == expected_string
     print("\nCube reconstruction verification: PASSED")
 
-    # NEW - Send reconstructed cube to existing solver
+    # Send reconstructed cube to existing solver
     solution = solve_cube(cube_string)
 
     print("\n--- Kociemba Solution ---")

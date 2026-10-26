@@ -18,19 +18,19 @@ class OpenCVCamera:
         if not self.cap.isOpened():
             raise RuntimeError("Camera unavailable")
 
-    #Capture multiple frames and verify color consistency
+    # Capture multiple frames and verify color consistency
     def capture(self, visible_facelets=None):
-        #Allow camera/cube image to stabilize
+        # Allow camera/cube image to stabilize
         time.sleep(0.2)
 
-        #Discard 2 potentially buffered frames
+        # Discard 2 potentially buffered frames
         for i in range(2):
             if not self.cap.grab():
                 raise RuntimeError("Failed to refresh camera frame")
         
         samples = []
-
-        # NEW - Collect 5 separate camera frames
+ 
+        # Collect 5 separate camera frames
         for i in range(5):
             success, frame = self.cap.read()
 
@@ -40,7 +40,7 @@ class OpenCVCamera:
             grid_colors = read_grid(frame, draw_preview=False)
             samples.append(grid_colors)
 
-        # NEW - Determine the most consistent color for each cell
+        # Determine the most consistent color for each cell
         final_grid = []
 
         for row in range(3):
@@ -48,15 +48,15 @@ class OpenCVCamera:
 
             for col in range(3):
 
-                # NEW - Get this cell's color across all 5 frames
+                # Get this cell's color across all 5 frames
                 readings = [
                     sample[row][col] for sample in samples
                 ]
 
-                # NEW - Find most frequently detected color
+                # Find most frequently detected color
                 color, count = Counter(readings).most_common(1)[0]
 
-                # NEW - Require at least 4 matching readings
+                # Require at least 4 matching readings
                 if count < 4 or color not in COLOR_TO_FACE:
                     raise ValueError(
                         f"Unstable color at row {row + 1}, "
@@ -80,7 +80,7 @@ class OpenCVCamera:
 
         return frame
    
-    # NEW - Read HSV values from the center sticker
+    # Read HSV values from the center sticker
     def inspect_center_hsv(self):
         success, frame = self.cap.read()
 
@@ -89,7 +89,7 @@ class OpenCVCamera:
 
         height, width = frame.shape[:2]
 
-        # NEW - Match our existing center-only sampling area
+        # Match our existing center-only sampling area
         cell_size = BOX_SIZE // 3
         sample_margin = cell_size // 5
         half_size = cell_size // 2 - sample_margin
@@ -97,20 +97,20 @@ class OpenCVCamera:
         center_x = width // 2
         center_y = height // 2
 
-        # NEW - Extract center 60% of the middle sticker
+        # Extract center 60% of the middle sticker
         sample = frame[
             center_y - half_size:center_y + half_size,
             center_x - half_size:center_x + half_size
         ]
 
-        # NEW - Convert BGR to HSV
+        # Convert BGR to HSV
         hsv_sample = cv2.cvtColor(sample, cv2.COLOR_BGR2HSV)
 
-        # NEW - Calculate median HSV values
+        # Calculate median HSV values
         pixels = hsv_sample.reshape(-1, 3)
         hsv_values = np.median(pixels, axis=0).astype(int)
 
-        # NEW - Identify color using existing detection function
+        # Identify color using existing detection function
         detected_color = detect_cell_color(hsv_sample)
 
         print(

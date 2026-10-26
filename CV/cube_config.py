@@ -48,12 +48,12 @@ color_ranges = {
     "white": (np.array([0, 0, 180]), np.array([180, 70, 255]))
 }
 
-# NEW - Camera/scanner settings
+# Camera/scanner settings
 CAMERA_INDEX = 0        # Camera device number
 BOX_SIZE = 180          # Size of 3x3 detection grid
 MIN_COLOR_PIXELS = 150 # Minimum pixels required to identify a color
 
-# NEW - Match existing color_ranges to the new detector
+# Match existing color_ranges to the new detector
 COLOR_RANGES = color_ranges
 
 # Face rotation correction before building solver string
