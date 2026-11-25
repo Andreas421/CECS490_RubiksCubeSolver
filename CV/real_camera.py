@@ -1,6 +1,7 @@
 import cv2
 import time
 import numpy as np
+from pi_camera_capture import PiCameraCapture
 
 from cube_config import CAMERA_INDEX
 from color_detector_step1 import read_grid
@@ -13,7 +14,7 @@ from color_detector_step1 import read_grid, detect_cell_color
 class OpenCVCamera:
     def __init__(self):
         #Open the physical camera
-        self.cap = cv2.VideoCapture(CAMERA_INDEX)
+        self.cap = PiCameraCapture()
 
         if not self.cap.isOpened():
             raise RuntimeError("Camera unavailable")
